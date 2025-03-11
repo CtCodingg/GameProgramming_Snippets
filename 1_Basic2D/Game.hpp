@@ -5,8 +5,12 @@
 
 #include <SDL3/SDL.h>
 
-#include <mutex>
-#include <thread>
+#include <vector>
+
+struct Ball {
+  Vector2D pos;
+  Vector2D vel;
+};
 
 class Game final : public iGame {
 public:
@@ -17,7 +21,7 @@ public:
   Game(Game&& other) = delete;
   Game& operator=(Game&& other) = delete;
 
-  Game(int width, int height, bool single_player);
+  Game(int width, int height, bool single_player, int number_of_balls);
 
   void RunLoop() override;
 
@@ -39,8 +43,7 @@ private:
   const int paddle_height_ = 80;
   Vector2D paddle_pos_p0_;
   Vector2D paddle_pos_p1_;
-  Vector2D ball_pos_;
-  Vector2D ball_vel_;
+  std::vector<Ball> balls_;
 
   Uint64 ticks_count_ = 0;
   Uint8 target_framerat_ = 60;
