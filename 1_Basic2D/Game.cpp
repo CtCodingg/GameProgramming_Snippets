@@ -3,8 +3,8 @@
 #include <stdexcept>
 #include <stdint.h>
 
-Game::Game(int width, int height) :
-  width_(width), height_(height) {
+Game::Game(int width, int height, bool single_player) :
+  width_(width), height_(height), single_player_(single_player) {
   if (!SDL_Init(SDL_INIT_VIDEO)) {
     throw std::runtime_error("Error initializing sdl library");
   }
@@ -19,8 +19,12 @@ Game::Game(int width, int height) :
     throw std::runtime_error("Error creating renderer");
   }
 
-  paddle_pos_.SetX(border_thickness_);
-  paddle_pos_.SetY(height_ / 2);
+  paddle_pos_p0_.SetX(border_thickness_);
+  paddle_pos_p0_.SetY(height_ / 2);
+  if (!single_player_) {
+    paddle_pos_p1_.SetX(width_ - border_thickness_ - paddle_width_);
+    paddle_pos_p1_.SetY(height_ / 2);
+  }
   ball_pos_.SetX(width_ / 2);
   ball_pos_.SetY(height_ / 2);
   ball_vel_.SetX(-width_ / 4);
@@ -53,17 +57,24 @@ void Game::ProcessInput() {
     }
   }
 
-  paddle_direction_ = 0;
+  paddle_direction_p0_ = 0;
+  paddle_direction_p1_ = 0;
 
   const bool* state = SDL_GetKeyboardState(nullptr);
   if (state[SDL_SCANCODE_ESCAPE]) {
     running_ = false;
   }
   if (state[SDL_SCANCODE_W]) {
-    paddle_direction_ -= 1;
+    paddle_direction_p0_ -= 1;
   }
   if (state[SDL_SCANCODE_S]) {
-    paddle_direction_ += 1;
+    paddle_direction_p0_ += 1;
+  }
+  if (state[SDL_SCANCODE_UP]) {
+    paddle_direction_p1_ -= 1;
+  }
+  if (state[SDL_SCANCODE_DOWN]) {
+    paddle_direction_p1_ += 1;
   }
 }
 
@@ -74,22 +85,22 @@ void Game::UpdateGame() {
   float delta_time = (SDL_GetTicks() - ticks_count_) / 1000.f;
   ticks_count_ = SDL_GetTicks();
   delta_time = std::min(delta_time, 0.05f);
-  
-  const float paddle_speed = height_ / 3;
-  if (paddle_direction_ != 0) {
-    paddle_pos_.SetY(paddle_pos_.GetY() + (paddle_direction_ * paddle_speed * delta_time));
-    if (paddle_pos_.GetY() < (paddle_height_ / 2 + border_thickness_)) {
-      paddle_pos_.SetY(paddle_height_ / 2 + border_thickness_);
-    }
-    else if (paddle_pos_.GetY() > (height_ - paddle_height_ / 2 - border_thickness_)) {
-      paddle_pos_.SetY(height_ - paddle_height_ / 2 - border_thickness_);
-    }
-  }
 
   ball_pos_.SetX(ball_pos_.GetX() + ball_vel_.GetX() * delta_time);
   ball_pos_.SetY(ball_pos_.GetY() + ball_vel_.GetY() * delta_time);
 
-  float diff = paddle_pos_.GetY() - ball_pos_.GetY();
+  const float paddle_speed = height_ / 3;
+  if (paddle_direction_p0_ != 0) {
+    paddle_pos_p0_.SetY(paddle_pos_p0_.GetY() + (paddle_direction_p0_ * paddle_speed * delta_time));
+    if (paddle_pos_p0_.GetY() < (paddle_height_ / 2 + border_thickness_)) {
+      paddle_pos_p0_.SetY(paddle_height_ / 2 + border_thickness_);
+    }
+    else if (paddle_pos_p0_.GetY() > (height_ - paddle_height_ / 2 - border_thickness_)) {
+      paddle_pos_p0_.SetY(height_ - paddle_height_ / 2 - border_thickness_);
+    }
+  }
+
+  float diff = paddle_pos_p0_.GetY() - ball_pos_.GetY();
   diff = (diff > 0.0f) ? diff : -diff;
   if (diff <= paddle_height_ / 2.0f && ball_pos_.GetX() <= (border_thickness_ + paddle_width_) && ball_pos_.GetX() >= (border_thickness_) && ball_vel_.GetX() < 0.0f) {
     ball_vel_.SetX(ball_vel_.GetX() * -1.f);
@@ -97,8 +108,29 @@ void Game::UpdateGame() {
   else if (ball_pos_.GetX() <= 0.0f) {
     running_ = false;
   }
-  else if (ball_pos_.GetX() >= (width_ - border_thickness_) && ball_vel_.GetX() > 0.0f) {
+  else if (ball_pos_.GetX() >= (width_ - border_thickness_) && ball_vel_.GetX() > 0.0f && single_player_) {
     ball_vel_.SetX(ball_vel_.GetX() * -1.f);
+  }
+
+  if (paddle_direction_p1_ != 0) {
+    paddle_pos_p1_.SetY(paddle_pos_p1_.GetY() + (paddle_direction_p1_ * paddle_speed * delta_time));
+    if (paddle_pos_p1_.GetY() < (paddle_height_ / 2 + border_thickness_)) {
+      paddle_pos_p1_.SetY(paddle_height_ / 2 + border_thickness_);
+    }
+    else if (paddle_pos_p1_.GetY() > (height_ - paddle_height_ / 2 - border_thickness_)) {
+      paddle_pos_p1_.SetY(height_ - paddle_height_ / 2 - border_thickness_);
+    }
+  }
+
+  if (!single_player_) {
+    diff = paddle_pos_p1_.GetY() - ball_pos_.GetY();
+    diff = (diff > 0.0f) ? diff : -diff;
+    if (diff <= paddle_height_ / 2.0f && ball_pos_.GetX() >= (width_ - border_thickness_ - paddle_width_) && ball_pos_.GetX() <= (width_ - border_thickness_) && ball_vel_.GetX() > 0.0f) {
+      ball_vel_.SetX(ball_vel_.GetX() * -1.f);
+    }
+    else if (ball_pos_.GetX() > width_) {
+      running_ = false;
+    }
   }
 
   if (ball_pos_.GetY() <= border_thickness_ && ball_vel_.GetY() < 0.0f) {
@@ -125,9 +157,13 @@ void Game::GenerateOutput() {
 
   SDL_SetRenderDrawColorFloat(renderer_, 0.f, 0.f, 0.f, 1.f);
   const SDL_FRect ball{ ball_pos_.GetX() - ball_size_ / 2, ball_pos_.GetY() - ball_size_ / 2, ball_size_, ball_size_ };
-  const SDL_FRect paddle{ paddle_pos_.GetX() - paddle_width_ / 2, paddle_pos_.GetY() - paddle_height_ / 2, paddle_width_, paddle_height_ };
+  const SDL_FRect paddle_p0{ paddle_pos_p0_.GetX() - paddle_width_ / 2, paddle_pos_p0_.GetY() - paddle_height_ / 2, paddle_width_, paddle_height_ };
   SDL_RenderFillRect(renderer_, &ball);
-  SDL_RenderFillRect(renderer_, &paddle);
+  SDL_RenderFillRect(renderer_, &paddle_p0);
+  if (!single_player_) {
+    const SDL_FRect paddle_p1{ paddle_pos_p1_.GetX() - paddle_width_ / 2, paddle_pos_p1_.GetY() - paddle_height_ / 2, paddle_width_, paddle_height_ };
+    SDL_RenderFillRect(renderer_, &paddle_p1);
+  }
 
   SDL_RenderPresent(renderer_);
 }

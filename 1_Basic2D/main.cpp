@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[])
 {
-	Game game{ 1920, 1080 };
+	Game game{ 1920, 1080, true };
 	game.RunLoop();
 
 	return 0;
