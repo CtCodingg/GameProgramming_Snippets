@@ -48,9 +48,9 @@ Game::Game(int width, int height, bool single_player, int number_of_balls) :
 }
 
 Game::~Game() {
-  if(renderer_)
+  if (renderer_)
     SDL_DestroyRenderer(renderer_);
-  if(window_)
+  if (window_)
     SDL_DestroyWindow(window_);
   SDL_Quit();
 }
@@ -67,9 +67,9 @@ void Game::ProcessInput() {
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
-      case SDL_EVENT_QUIT:
-        running_ = false;
-        break;
+    case SDL_EVENT_QUIT:
+      running_ = false;
+      break;
     }
   }
 
@@ -167,7 +167,7 @@ void Game::GenerateOutput() {
 
   SDL_SetRenderDrawColorFloat(renderer_, 1.f, 1.f, 1.f, 1.f);
   const SDL_FRect wall_top{ 0, 0, width_, border_thickness_ };
-  const SDL_FRect wall_right{ width_ - border_thickness_, 0, border_thickness_, height_};
+  const SDL_FRect wall_right{ width_ - border_thickness_, 0, border_thickness_, height_ };
   const SDL_FRect wall_bottom{ 0, height_ - border_thickness_, width_, border_thickness_ };
   const SDL_FRect wall_left{ 0, 0, border_thickness_, height_ };
   SDL_RenderFillRect(renderer_, &wall_top);
@@ -181,7 +181,7 @@ void Game::GenerateOutput() {
     SDL_RenderFillRect(renderer_, &ballRect);
   }
   const SDL_FRect paddle_p0{ paddle_pos_p0_.x - paddle_width_ / 2, paddle_pos_p0_.y - paddle_height_ / 2, paddle_width_, paddle_height_ };
-  
+
   SDL_RenderFillRect(renderer_, &paddle_p0);
   if (!single_player_) {
     const SDL_FRect paddle_p1{ paddle_pos_p1_.x - paddle_width_ / 2, paddle_pos_p1_.y - paddle_height_ / 2, paddle_width_, paddle_height_ };

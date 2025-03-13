@@ -5,11 +5,13 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 add_compile_definitions(COMMON_EXPORTS)
 
 set(HEADERS
- Vector2D.hpp
+ Vector.hpp
  iGame.hpp
+ iActor.hpp
+ Actor.hpp
 )
 set(SOURCES 
- Vector2D.cpp
+ Actor.cpp
 )
 
 set(ALL
