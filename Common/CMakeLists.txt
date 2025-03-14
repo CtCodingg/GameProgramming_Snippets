@@ -38,3 +38,4 @@ target_link_libraries(Common PRIVATE SDL3::SDL3)
 target_link_libraries(Common PRIVATE SDL3_image)
 
 install(TARGETS Common DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+install(FILES ${SDL3_DIR}/Release/SDL3.dll DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
