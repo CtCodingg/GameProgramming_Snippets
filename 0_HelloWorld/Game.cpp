@@ -4,11 +4,11 @@
 #include <stdint.h>
 
 Game::Game(int width, int height, int fps) : fps_(fps) {
-  if (!SDL_Init(SDL_INIT_VIDEO)) {
+  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     throw std::runtime_error("Error initializing sdl library");
   }
 
-  window_ = SDL_CreateWindow("0_HelloWorld", width, height, 0);
+  window_ = SDL_CreateWindow("0_HelloWorld", 0, 0, width, height, 0);
   if (window_ == nullptr) {
     throw std::runtime_error("Error creating window");
   }
@@ -33,13 +33,13 @@ void Game::ProcessInput() {
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
-      case SDL_EVENT_QUIT:
+      case SDL_QUIT:
         running_ = false;
         break;
     }
   }
 
-  const bool* state = SDL_GetKeyboardState(nullptr);
+  const uint8_t* state = SDL_GetKeyboardState(nullptr);
   if (state[SDL_SCANCODE_ESCAPE]) {
     running_ = false;
   }

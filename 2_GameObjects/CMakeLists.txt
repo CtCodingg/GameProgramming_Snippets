@@ -1,17 +1,21 @@
 cmake_minimum_required(VERSION 3.10)
 
 set(PROJECT 2_GameObjects)
-
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-find_package(SDL3 REQUIRED)
 
 set(HEADERS
  Game.hpp
+ Vector.hpp
+ SpriteComponent.hpp
+ Actor.hpp
+ Component.hpp
 )
 set(SOURCES 
  Game.cpp
  main.cpp
+ Actor.cpp
+ Component.cpp
+ SpriteComponent.cpp
 )
 
 set(ALL
@@ -19,8 +23,12 @@ set(ALL
   ${SOURCES}
 )
 
-add_executable(${PROJECT} ${ALL})
-include_directories(${CMAKE_INSTALL_PREFIX}/include)
-target_link_libraries(${PROJECT} PRIVATE Common SDL3::SDL3)
+link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../External/SDL/lib)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../External/SDL/include)
+
+add_executable(${PROJECT} WIN32 ${ALL})
+
+target_link_libraries(${PROJECT} PRIVATE SDL2 SDL2_image SDL2main SDL2_ttf SDL2_mixer)
 
 install(TARGETS ${PROJECT} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../External/SDL/lib/ DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)

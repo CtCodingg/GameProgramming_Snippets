@@ -1,18 +1,20 @@
 #pragma once
 
-#include <Common/iGame.hpp>
-#include <Common/Vector.hpp>
+#include "SpriteComponent.hpp"
+#include "Actor.hpp"
+#include "Component.hpp"
 
-#include <SDL3/SDL.h>
+#include <SDL/SDL.h>
 
 #include <vector>
+#include <memory>
 
 struct Ball {
   Vector2DFloat pos;
   Vector2DFloat vel;
 };
 
-class Game final : public iGame {
+class Game {
 public:
   Game() = delete;
   virtual ~Game();
@@ -23,12 +25,15 @@ public:
 
   Game(int width, int height, bool single_player, int number_of_balls);
 
-  void RunLoop() override;
+  void RunLoop();
+  void AddActor(std::shared_ptr<Actor> actor);
+  void RemoveActor(std::shared_ptr<Actor> actor);
+  void AddSprite(std::shared_ptr<SpriteComponent> sprite);
 
 protected:
-  void ProcessInput() override;
-  void UpdateGame() override;
-  void GenerateOutput() override;
+  void ProcessInput();
+  void UpdateGame();
+  void GenerateOutput();
 
 private:
   SDL_Window* window_ = nullptr;
@@ -37,19 +42,11 @@ private:
   int width_ = 1920;
   int height_ = 1080;
 
-  const int border_thickness_ = 15;
-  const int ball_size_ = 15;
-  const int paddle_width_ = 15;
-  const int paddle_height_ = 80;
-  Vector2DFloat paddle_pos_p0_;
-  Vector2DFloat paddle_pos_p1_;
-  std::vector<Ball> balls_;
-
   Uint64 ticks_count_ = 0;
   Uint8 target_framerat_ = 60;
 
-  int paddle_direction_p0_ = 0;
-  int paddle_direction_p1_ = 0;
-
-  bool single_player_ = true;
+  bool updating_actors_ = false;
+  std::vector<std::shared_ptr<Actor>> actors_;
+  std::vector<std::shared_ptr<Actor>> pending_actors_;
+  std::vector<std::shared_ptr<SpriteComponent>> sprites_;
 };

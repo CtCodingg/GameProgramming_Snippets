@@ -7,16 +7,16 @@
 
 Game::Game(int width, int height, bool single_player, int number_of_balls) :
   width_(width), height_(height), single_player_(single_player) {
-  if (!SDL_Init(SDL_INIT_VIDEO)) {
+  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     throw std::runtime_error("Error initializing sdl library");
   }
 
-  window_ = SDL_CreateWindow("1_Basic2D", width, height, 0);
+  window_ = SDL_CreateWindow("0_HelloWorld", 0, 0, width, height, 0);
   if (window_ == nullptr) {
     throw std::runtime_error("Error creating window");
   }
 
-  renderer_ = SDL_CreateRenderer(window_, nullptr);
+  renderer_ = SDL_CreateRenderer(window_, 0, 0);
   if (renderer_ == nullptr) {
     throw std::runtime_error("Error creating renderer");
   }
@@ -67,7 +67,7 @@ void Game::ProcessInput() {
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
-      case SDL_EVENT_QUIT:
+      case SDL_QUIT:
         running_ = false;
         break;
     }
@@ -76,7 +76,7 @@ void Game::ProcessInput() {
   paddle_direction_p0_ = 0;
   paddle_direction_p1_ = 0;
 
-  const bool* state = SDL_GetKeyboardState(nullptr);
+  const uint8_t* state = SDL_GetKeyboardState(nullptr);
   if (state[SDL_SCANCODE_ESCAPE]) {
     running_ = false;
   }
@@ -162,29 +162,29 @@ void Game::UpdateGame() {
 }
 
 void Game::GenerateOutput() {
-  SDL_SetRenderDrawColorFloat(renderer_, 0, 0, 1.f, 1.f);
+  SDL_SetRenderDrawColor(renderer_, 0, 0, 255, 255);
   SDL_RenderClear(renderer_);
 
-  SDL_SetRenderDrawColorFloat(renderer_, 1.f, 1.f, 1.f, 1.f);
-  const SDL_FRect wall_top{ 0, 0, width_, border_thickness_ };
-  const SDL_FRect wall_right{ width_ - border_thickness_, 0, border_thickness_, height_};
-  const SDL_FRect wall_bottom{ 0, height_ - border_thickness_, width_, border_thickness_ };
-  const SDL_FRect wall_left{ 0, 0, border_thickness_, height_ };
+  SDL_SetRenderDrawColor(renderer_, 255, 255, 255, 255);
+  const SDL_Rect wall_top{ 0, 0, width_, border_thickness_ };
+  const SDL_Rect wall_right{ width_ - border_thickness_, 0, border_thickness_, height_};
+  const SDL_Rect wall_bottom{ 0, height_ - border_thickness_, width_, border_thickness_ };
+  const SDL_Rect wall_left{ 0, 0, border_thickness_, height_ };
   SDL_RenderFillRect(renderer_, &wall_top);
   SDL_RenderFillRect(renderer_, &wall_right);
   SDL_RenderFillRect(renderer_, &wall_bottom);
   SDL_RenderFillRect(renderer_, &wall_left);
 
-  SDL_SetRenderDrawColorFloat(renderer_, 0.f, 0.f, 0.f, 1.f);
+  SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
   for (auto& ball : balls_) {
-    const SDL_FRect ballRect{ ball.pos.x - ball_size_ / 2, ball.pos.y - ball_size_ / 2, ball_size_, ball_size_ };
+    const SDL_Rect ballRect{ ball.pos.x - ball_size_ / 2, ball.pos.y - ball_size_ / 2, ball_size_, ball_size_ };
     SDL_RenderFillRect(renderer_, &ballRect);
   }
-  const SDL_FRect paddle_p0{ paddle_pos_p0_.x - paddle_width_ / 2, paddle_pos_p0_.y - paddle_height_ / 2, paddle_width_, paddle_height_ };
+  const SDL_Rect paddle_p0{ paddle_pos_p0_.x - paddle_width_ / 2, paddle_pos_p0_.y - paddle_height_ / 2, paddle_width_, paddle_height_ };
   
   SDL_RenderFillRect(renderer_, &paddle_p0);
   if (!single_player_) {
-    const SDL_FRect paddle_p1{ paddle_pos_p1_.x - paddle_width_ / 2, paddle_pos_p1_.y - paddle_height_ / 2, paddle_width_, paddle_height_ };
+    const SDL_Rect paddle_p1{ paddle_pos_p1_.x - paddle_width_ / 2, paddle_pos_p1_.y - paddle_height_ / 2, paddle_width_, paddle_height_ };
     SDL_RenderFillRect(renderer_, &paddle_p1);
   }
 

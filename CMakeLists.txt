@@ -3,7 +3,6 @@ project(GameProgramming_Snippets)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_subdirectory(Common)
 add_subdirectory(0_HelloWorld)
 add_subdirectory(1_Basic2D)
 add_subdirectory(2_GameObjects)

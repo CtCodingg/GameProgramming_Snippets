@@ -1,9 +1,8 @@
 #pragma once
 
-#include <Common/iGame.hpp>
-#include <Common/Vector.hpp>
+#include "Vector.hpp"
 
-#include <SDL3/SDL.h>
+#include <SDL/SDL.h>
 
 #include <vector>
 
@@ -12,7 +11,7 @@ struct Ball {
   Vector2DFloat vel;
 };
 
-class Game final : public iGame {
+class Game {
 public:
   Game() = delete;
   virtual ~Game();
@@ -23,12 +22,12 @@ public:
 
   Game(int width, int height, bool single_player, int number_of_balls);
 
-  void RunLoop() override;
+  void RunLoop();
 
 protected:
-  void ProcessInput() override;
-  void UpdateGame() override;
-  void GenerateOutput() override;
+  void ProcessInput();
+  void UpdateGame();
+  void GenerateOutput();
 
 private:
   SDL_Window* window_ = nullptr;
