@@ -2,10 +2,10 @@
 
 #include "Component.hpp"
 
+#include <vector>
+
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
-
-class Actor;
 
 class SpriteComponent : public Component {
 public:
@@ -16,12 +16,12 @@ public:
   SpriteComponent(SpriteComponent&& other) = default;
   SpriteComponent& operator=(SpriteComponent&& other) = default;
 
-  SpriteComponent(std::shared_ptr<Actor> owner, int update_order = 100, int draw_order = 100);
+  SpriteComponent(Actor* owner, int draw_order = 100);
 
-  void Update(float delta_time) override;
-  void Draw(SDL_Renderer* renderer) override;
+  virtual void Draw(SDL_Renderer* renderer);
+
   int GetDrawOrder() const { return draw_order_; }
 
-private:
+protected:
   int draw_order_ = 100;
 };

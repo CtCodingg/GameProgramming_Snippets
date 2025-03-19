@@ -1,12 +1,20 @@
 #include "SpriteComponent.hpp"
 #include "Actor.hpp"
+#include "Math.hpp"
+#include "Game.hpp"
 
-SpriteComponent::SpriteComponent(std::shared_ptr<Actor> owner, int update_order, int draw_order) :
-  Component(owner, update_order), draw_order_(draw_order)
-{}
-
-void SpriteComponent::Update(float delta_time) {
+SpriteComponent::SpriteComponent(Actor* owner, int draw_order) :
+  Component(owner), draw_order_(draw_order) {
+	owner->GetGame()->AddSprite(this);
 }
 
 void SpriteComponent::Draw(SDL_Renderer* renderer) {
+	if (texture_) {
+		SDL_Rect r;
+		r.w = static_cast<int>(tex_width_ * owner_->GetScale());
+		r.h = static_cast<int>(tex_height_ * owner_->GetScale());
+		r.x = static_cast<int>(owner_->GetPosition().x - r.w / 2);
+		r.y = static_cast<int>(owner_->GetPosition().y - r.h / 2);
+		SDL_RenderCopyEx(renderer, texture_, nullptr, &r, -Math::ToDegrees(owner_->GetRotation()), nullptr, SDL_FLIP_NONE);
+	}
 }

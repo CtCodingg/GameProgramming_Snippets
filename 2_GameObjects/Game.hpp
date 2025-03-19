@@ -3,16 +3,19 @@
 #include "SpriteComponent.hpp"
 #include "Actor.hpp"
 #include "Component.hpp"
+#include "Ship.hpp"
 
 #include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
 
 #include <vector>
-#include <memory>
+#include <unordered_map>
+#include <string>
 
 struct Ball {
   Vector2DFloat pos;
   Vector2DFloat vel;
-};
+}; 
 
 class Game {
 public:
@@ -23,30 +26,37 @@ public:
   Game(Game&& other) = delete;
   Game& operator=(Game&& other) = delete;
 
-  Game(int width, int height, bool single_player, int number_of_balls);
+  Game(int width, int height);
 
   void RunLoop();
-  void AddActor(std::shared_ptr<Actor> actor);
-  void RemoveActor(std::shared_ptr<Actor> actor);
-  void AddSprite(std::shared_ptr<SpriteComponent> sprite);
+  void AddActor(Actor* actor);
+  void AddSprite(SpriteComponent* sprite);
+  void RemoveActor(Actor* actor);
+
+  SDL_Texture* GetTexture(const std::string& fileName);
 
 protected:
-  void ProcessInput();
-  void UpdateGame();
-  void GenerateOutput();
+  void _ProcessInput();
+  void _UpdateGame();
+  void _GenerateOutput();
+  void _LoadData();
+  void _UnloadData();
 
 private:
+  std::unordered_map<std::string, SDL_Texture*> textures_;
+
+  std::vector<Actor*> actors_;
+  std::vector<Actor*> pending_actors_;
+
+  std::vector<SpriteComponent*> sprites_;
+
   SDL_Window* window_ = nullptr;
   SDL_Renderer* renderer_ = nullptr;
-  bool running_ = true;
-  int width_ = 1920;
-  int height_ = 1080;
-
-  Uint64 ticks_count_ = 0;
-  Uint8 target_framerat_ = 60;
-
+  Uint32 ticks_count_ = 0;
+  bool is_running_ = true;
   bool updating_actors_ = false;
-  std::vector<std::shared_ptr<Actor>> actors_;
-  std::vector<std::shared_ptr<Actor>> pending_actors_;
-  std::vector<std::shared_ptr<SpriteComponent>> sprites_;
+  float win_width_ = 0.f;
+  float win_height_ = 0.f;
+
+  Ship* ship_ = nullptr;
 };

@@ -2,7 +2,6 @@
 
 #include "Vector.hpp"
 
-#include <memory>
 #include <vector>
 
 class Game;
@@ -17,32 +16,37 @@ public:
   };
 
   Actor() = delete;
-  virtual ~Actor() = default;
+  virtual ~Actor();
   Actor(const Actor& other) = default;
   Actor& operator=(const Actor& other) = default;
   Actor(Actor&& other) = default;
   Actor& operator=(Actor&& other) = default;
 
-  Actor(std::shared_ptr<Game> game);
+  Actor(Game* game);
 
   void Update(float delta_time);
-  void UpdateComponents(float delta_time);
-  void UpdateActor(float delta_time);
-  void AddComponent(std::shared_ptr<Component> component);
-  void RemoveComponent(std::shared_ptr<Component> component);
+  void AddComponent(Component* component);
+  void RemoveComponent(Component* component);
 
-  std::shared_ptr<Game> GetGame() { return game_; }
-  std::vector<std::shared_ptr<Component>> GetComponents() { return components_; }
+  Game* GetGame() { return game_; }
+  std::vector<Component*> GetComponents() { return components_; }
   State GetState() { return state_; }
+  void SetState(State state) { state_ = state; }
   Vector2DFloat GetPosition() { return position_; }
+  void SetPosition(Vector2DFloat pos) { position_ = pos; }
   float GetScale() { return scale_; }
-  float GetRotation() { return rotation; }
+  void SetScale(float scale) { scale_ = scale; }
+  float GetRotation() { return rotation_; }
+  void SetRotation(float rot) { rotation_ = rot; }
 
-private:
-  std::shared_ptr<Game> game_ = nullptr;
-  std::vector<std::shared_ptr<Component>> components_;
-  State state_;
+protected:
+  void _UpdateComponents(float delta_time);
+  virtual void _UpdateActor(float delta_time);
+
+  Game* game_ = nullptr;
+  std::vector<Component*> components_;
+  State state_ = State::Active;
   Vector2DFloat position_;
   float scale_ = 0.f;
-  float rotation = 0.f;
+  float rotation_ = 0.f;
 };
