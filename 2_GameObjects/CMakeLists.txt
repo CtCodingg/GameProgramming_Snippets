@@ -13,6 +13,7 @@ set(HEADERS
  Component.hpp
  Math.hpp
  Ship.hpp
+ Enemy.hpp
 )
 set(SOURCES 
  Game.cpp
@@ -24,6 +25,7 @@ set(SOURCES
  SpriteComponent.cpp
  Math.cpp
  Ship.cpp
+ Enemy.cpp
 )
 
 set(ALL
@@ -41,3 +43,4 @@ target_link_libraries(${PROJECT} PRIVATE SDL2 SDL2_image SDL2main SDL2_ttf SDL2_
 install(TARGETS ${PROJECT} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../External/SDL/lib/ DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Assets/ DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/Assets)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Assets-priv/ DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/Assets)

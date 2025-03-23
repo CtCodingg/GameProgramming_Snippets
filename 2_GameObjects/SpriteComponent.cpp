@@ -5,7 +5,12 @@
 
 SpriteComponent::SpriteComponent(Actor* owner, int draw_order) :
   Component(owner), draw_order_(draw_order) {
-	owner->GetGame()->AddSprite(this);
+	owner_->GetGame()->AddSprite(this);
+}
+
+SpriteComponent::~SpriteComponent()
+{
+	owner_->GetGame()->RemoveSprite(this);
 }
 
 void SpriteComponent::Draw(SDL_Renderer* renderer) {

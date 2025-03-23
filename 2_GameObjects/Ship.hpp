@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Actor.hpp"
+#include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
 
 class Ship : public Actor
 {
@@ -17,6 +19,10 @@ public:
 
 	float GetRightSpeed() const { return right_speed_; }
 	float GetDownSpeed() const { return down_speed; }
+	void Draw(SDL_Renderer* renderer);
+	int GetLaserHeightMin() const { return position_.y - laser_height_ / 2; };
+	int GetLaserHeightMax() const  { return position_.y + laser_height_ / 2; };
+	bool IsLaserEnabled() const { return laser_enabled_; }
 
 protected:
 	void _UpdateActor(float delta_time) override;
@@ -24,4 +30,7 @@ protected:
 private:
 	float right_speed_ = 0.f;
 	float down_speed = 0.f;
+	bool laser_enabled_ = false;
+	int laser_height_ = 20;
+	SDL_Texture* laser_texture_ = nullptr;
 };

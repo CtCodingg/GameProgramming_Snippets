@@ -10,7 +10,7 @@
 class SpriteComponent : public Component {
 public:
   SpriteComponent() = delete;
-  virtual ~SpriteComponent() = default;
+  virtual ~SpriteComponent();
   SpriteComponent(const SpriteComponent& other) = default;
   SpriteComponent& operator=(const SpriteComponent& other) = default;
   SpriteComponent(SpriteComponent&& other) = default;

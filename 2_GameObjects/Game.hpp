@@ -4,6 +4,7 @@
 #include "Actor.hpp"
 #include "Component.hpp"
 #include "Ship.hpp"
+#include "Enemy.hpp"
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
@@ -11,6 +12,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
+#include <chrono>
 
 struct Ball {
   Vector2DFloat pos;
@@ -31,9 +33,16 @@ public:
   void RunLoop();
   void AddActor(Actor* actor);
   void AddSprite(SpriteComponent* sprite);
+  void RemoveSprite(SpriteComponent* sprite);
   void RemoveActor(Actor* actor);
 
   SDL_Texture* GetTexture(const std::string& fileName);
+
+  float GetWinWidth() const { return win_width_; }
+  float GetWinHeight() const { return win_height_; }
+
+  int ActualNumberOfEnemies() { return enemy_.size(); }
+  void RemoveEnemy(Enemy* enemy);
 
 protected:
   void _ProcessInput();
@@ -59,4 +68,9 @@ private:
   float win_height_ = 0.f;
 
   Ship* ship_ = nullptr;
+  std::vector<Enemy*> enemy_;
+  int startNumberOfEnemies_ = 5;
+
+  int level_ = 1;
+  std::chrono::steady_clock::time_point start_timepoint_;
 };

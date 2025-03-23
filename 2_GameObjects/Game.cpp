@@ -42,10 +42,16 @@ Game::~Game() {
 }
 
 void Game::RunLoop() {
+  start_timepoint_ = std::chrono::steady_clock::now();
   while (is_running_) {
     _ProcessInput();
     _UpdateGame();
     _GenerateOutput();
+    const std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+    if (std::chrono::duration_cast<std::chrono::seconds>(now - start_timepoint_).count() > 5) {
+      level_++;
+      start_timepoint_ = std::chrono::steady_clock::now();
+    }
   }
 }
 
@@ -103,6 +109,20 @@ void Game::_LoadData() {
   ship_->SetPosition(Vector2DFloat(100.0f, win_height_ / 2));
   ship_->SetScale(1.5f);
 
+  const int number_of_enemies = startNumberOfEnemies_;
+  std::random_device rand_dev;
+  std::mt19937 generator(rand_dev());
+  std::uniform_int_distribution<int> distr_pos_y(10, GetWinHeight() - 10);
+  std::uniform_int_distribution<int> speed_right(-500, -200);
+  std::uniform_int_distribution<int> speed_down(-200, 200);
+  for (int i = 0; i <= number_of_enemies; i++) {
+    enemy_.push_back(new Enemy(this));
+    enemy_.at(i)->SetPosition(Vector2DFloat{ GetWinWidth(), (float)distr_pos_y(generator) });
+    enemy_.at(i)->SetScale(1.5f);
+    enemy_.at(i)->SetRightSpeed((float)speed_right(generator));
+    enemy_.at(i)->SetDownSpeed((float)speed_down(generator));
+  }
+
   Actor* tmp = new Actor(this);
   tmp->SetPosition(Vector2DFloat(win_width_ / 2, win_height_ / 2));
 
@@ -141,6 +161,26 @@ void Game::AddSprite(SpriteComponent* sprite) {
     }
   }
   sprites_.insert(iter, sprite);
+}
+
+void Game::RemoveSprite(SpriteComponent* sprite) {
+  size_t i = 0;
+  for (; i < sprites_.size(); i++) {
+    if (sprite == sprites_.at(i)) {
+      break;
+    }
+  }
+  sprites_.erase(sprites_.begin() + i);
+}
+
+void Game::RemoveEnemy(Enemy* enemy) {
+  size_t i = 0;
+  for (; i < enemy_.size(); i++) {
+    if (enemy == enemy_.at(i)) {
+      break;
+    }
+  }
+  enemy_.erase(enemy_.begin() + i);
 }
 
 void Game::_ProcessInput() {
@@ -192,6 +232,32 @@ void Game::_UpdateGame() {
   for (auto actor : deadActors) {
     delete actor;
   }
+
+  while (ActualNumberOfEnemies() < (startNumberOfEnemies_ + 2 * level_)) {
+    std::random_device rand_dev;
+    std::mt19937 generator(rand_dev());
+    std::uniform_int_distribution<int> distr_pos_y(10, GetWinHeight() - 10);
+    std::uniform_int_distribution<int> speed_right(-500 + 10 * level_, -200);
+    std::uniform_int_distribution<int> speed_down(-200 + 10 * level_, 200 + 10 * level_);
+    Enemy* enemy = new Enemy(this);
+    enemy->SetPosition(Vector2DFloat{ GetWinWidth(), (float)distr_pos_y(generator) });
+    enemy->SetScale(1.5f);
+    enemy->SetRightSpeed((float)speed_right(generator));
+    enemy->SetDownSpeed((float)speed_down(generator));
+    enemy_.push_back(enemy);
+  }
+
+  constexpr int threshold = 80;
+  for (const auto& enemy : enemy_) {
+    if ((enemy->GetPosition().x - threshold < ship_->GetPosition().x) && (ship_->GetPosition().x < enemy->GetPosition().x + threshold) &&
+      ((enemy->GetPosition().y - threshold < ship_->GetPosition().y) && (ship_->GetPosition().y < enemy->GetPosition().y + threshold))) {
+      is_running_ = false;
+    }
+
+    if ((ship_->IsLaserEnabled()) && (ship_->GetLaserHeightMin() < enemy->GetPosition().y) && (enemy->GetPosition().y < ship_->GetLaserHeightMax())) {
+      enemy->SetState(Actor::State::Dead);
+    }
+  }
 }
 
 void Game::_GenerateOutput() {
@@ -201,6 +267,7 @@ void Game::_GenerateOutput() {
   for (auto sprite : sprites_) {
     sprite->Draw(renderer_);
   }
+  ship_->Draw(renderer_);
 
   SDL_RenderPresent(renderer_);
 }
